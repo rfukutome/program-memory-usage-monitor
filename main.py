@@ -6,13 +6,15 @@ import psutil
 
 MEMORY_USAGE = []
 
-def get_memory_utilization():
+def get_memory_utilization(pubg_not_running_count):
     '''
     Get the memory utilization of the PUBG video game,
     which runs as TslGame.exe.
     @todo: make this more dynamic
-    @return: None
-    @rtype: None
+    @param pubg_not_running_count: number of times this has been called and pubg wasn't running
+    @type pubg_not_running_count: int
+    @return: an updated pubg_not_running_count (+1 if not running, reset to 0 if running)
+    @rtype: int
     '''
     for proc in psutil.process_iter():
 
@@ -21,15 +23,17 @@ def get_memory_utilization():
             memory_usage = process.memory_percent()
             print('PUBG is using %.2f%% of your memory' % memory_usage)
             MEMORY_USAGE.append(memory_usage)
-            return
-    else:
-        print('PUBG is not running right now')
+            return 0
+
+    print('PUBG is not running right now')
+    return pubg_not_running_count + 1
 
 
 if __name__ == '__main__':
+    pubg_not_running_count = 0
     try:
-        while True:
-            get_memory_utilization()
+        while True and pubg_not_running_count < 2:
+            pubg_not_running_count = get_memory_utilization(pubg_not_running_count)
             time.sleep(10)
     except KeyboardInterrupt:
         print('Quitting the program')
